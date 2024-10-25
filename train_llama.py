@@ -7,14 +7,24 @@ dataset = load_dataset("miketes/Web-filtered-english-wave-ui-25k")
 
 # Define input and target columns for text generation
 def format_data(example):
-    input_text = f"Instruction: {example['instruction']}\nDescription: {example['description']}\n"
+    # Combine multiple fields into a single input string
+    input_text = (
+        f"Instruction: {example['instruction']}\n"
+        f"Image: {example['image']}\n"
+        f"BBox: {example['bbox']}\n"
+        f"Resolution: {example['resolution']}\n"
+        f"Name: {example['name']}\n"
+        f"Description: {example['description']}\n"
+        f"Type: {example['type']}\n"
+        f"Purpose: {example['purpose']}\n"
+    )
     target_text = example['expectation']
     return {"input": input_text, "target": target_text}
 
 dataset = dataset.map(format_data)
 
 # Load tokenizer and model
-model_name = "huggingface/llama"
+model_name = "meta-llama/Meta-Llama-3-8B"
 tokenizer = LlamaTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name)
 
