@@ -2,7 +2,8 @@ from datasets import load_dataset, Dataset
 from huggingface_hub import HfApi
 
 # Load the original dataset
-dataset = load_dataset("miketes/filtered-non-english-wave-ui-25k")
+#dataset = load_dataset("miketes/filtered-non-english-wave-ui-25k")
+dataset = load_dataset("agentsea/wave-ui-25k")
 
 # Define a filtering function to remove English rows
 def filter_non_english(example):

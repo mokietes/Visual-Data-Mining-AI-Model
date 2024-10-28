@@ -1,0 +1,6 @@
+CUDA SETUP: Something unexpected happened. Please compile from source:
+git clone https://github.com/TimDettmers/bitsandbytes.git
+cd bitsandbytes
+CUDA_VERSION=124
+python setup.py install
+CUDA SETUP: Setup Failed!

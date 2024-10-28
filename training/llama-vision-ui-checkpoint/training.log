@@ -1,0 +1,8 @@
+2024-10-26 20:10:03,037 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:11:14,746 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:18:11,496 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:19:27,576 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:20:52,359 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:24:54,437 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:28:25,801 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-26 20:33:04,544 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
