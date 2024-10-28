@@ -1,3 +1,10 @@
+""""ssh username@hpc_cluster (whatever it is for you)
+cd Visual-Data-Mining-AI-Model (after cloning and change the branch)
+create and activate the venv
+pip install -r requirements.txt
+cd training
+python3 llama_3.2_lora.py"""
+
 import os
 import torch
 import logging
