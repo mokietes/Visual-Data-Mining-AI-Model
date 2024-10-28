@@ -3,8 +3,7 @@ import torch
 import logging
 from transformers import AutoProcessor, AutoModelForVision2Seq, TrainingArguments
 from datasets import load_dataset
-from trl import SFTTrainer
-import json
+from trl import SFTTrainer, SFTConfig
 from huggingface_hub import HfFolder
 
 # Constants
@@ -26,20 +25,11 @@ def setup_model_and_processor(checkpoint_dir=None):
     
     return model, processor
 
-def prepare_dataset(dataset):
-    """Convert dataset to format expected by model"""
+def prepare_dataset(dataset, processor):
+    """Convert dataset to format expected by model and tokenize"""
     print(f"Preparing dataset with {len(dataset)} examples...")
     
-    # Debug: Print the first example to see its structure
-    print("\nExample data structure:")
-    first_example = dataset[0]
-    import pprint
-    pprint.pprint(first_example)
-    
     def format_instruction(example):
-        # Let's handle the data format more carefully
-        print(type(example))
-        print(example.keys())
         instruction = f"""Return the bounding box of the {example['description']}. It's used to {example['purpose']} and if we click it {example['expectation']}."""
         bbox = example['bbox']
         x_res, y_res = example['resolution']
@@ -51,23 +41,34 @@ def prepare_dataset(dataset):
         bbox = [round(x, 2) for x in bbox]  # Limit to two decimal places
         print(bbox)
         reply = f"""{str(bbox)}"""
-        return {
-            "messages": [
-                {"role": "system", "content": [{"type":"text", "text": "You are a helpful UI element detector, when the user asks you to find an element you return a bounding box in the format [topLeftX,topLeftY,bottomLeftX,bottomLeftY]"}]},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image", "image": example['image']},
-                        {"type": "text", "text": instruction}
-                    ]
-                },
-                {
-                    "role": "assistant",
-                    "content": [{"type": "text", "text": reply}]
-                }
-            ]
-        }
-
+        
+        # Create messages format
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": example['image']},
+                    {"type": "text", "text": instruction}
+                ]
+            },
+            {
+                "role": "assistant",
+                "content": [{"type": "text", "text": reply}]
+            }
+        ]
+        
+        # Tokenize the messages
+        texts = processor.apply_chat_template(messages, tokenize=False)
+        inputs = processor(
+            text=texts,
+            images=example['image'],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
+        
+        # Remove the batch dimension since we're processing one example at a time
+        return {k: v.squeeze(0) for k, v in inputs.items()}
 
     prepared_data = []
     for example in dataset:
@@ -79,11 +80,6 @@ def prepare_dataset(dataset):
             continue
 
     print(f"Dataset preparation complete. Formatted {len(prepared_data)} examples.")
-    
-    # Debug: Print the first formatted example
-    print("\nFirst formatted example:")
-    print(json.dumps(prepared_data[0], indent=2))
-    
     return prepared_data
 
 def create_data_collator(processor):
@@ -121,18 +117,13 @@ def train(resume_from_checkpoint=None):
     
     print(f"Loading dataset from {DATASET_NAME}")
     dataset = load_dataset(DATASET_NAME, split="train")
-
-    MAX_SAMPLES = 10#testing
+    
+    MAX_SAMPLES = 10  # testing
     dataset = dataset.select(range(min(len(dataset), MAX_SAMPLES)))
     print(f"Dataset size: {len(dataset)} samples")
-
-        
-    #dataset = dataset[:10]  # Reduced to 10 samples for testing
-    # Print dataset info
-    print("\nDataset features:")
-    print(dataset.features)
     
-    prepared_dataset = prepare_dataset(dataset)
+    # Pass processor to prepare_dataset
+    prepared_dataset = prepare_dataset(dataset, processor)
     
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
@@ -143,14 +134,14 @@ def train(resume_from_checkpoint=None):
         optim="adamw_torch",
         learning_rate=1e-5,
         bf16=True,
-        tf32=True,
+        tf32=False,
         max_grad_norm=0.3,
         warmup_ratio=0.03,
         lr_scheduler_type="cosine",
         save_strategy="steps",
         save_steps=100,
         logging_steps=10,
-        report_to="tensorboard",
+        report_to="none",  # Changed from "tensorboard" to "none"
         remove_unused_columns=False,
         push_to_hub=False,
         max_steps=5000,
@@ -173,6 +164,7 @@ def train(resume_from_checkpoint=None):
         train_dataset=prepared_dataset,
         data_collator=create_data_collator(processor),
         tokenizer=processor.tokenizer,
+        dataset_kwargs={'skip_prepare_dataset': True}  
     )
     
     print("\nTraining parameters:")

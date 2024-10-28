@@ -6,3 +6,14 @@
 2024-10-26 20:53:14,620 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
 2024-10-26 20:54:50,537 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
 2024-10-26 20:55:52,546 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:15:58,249 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:16:49,906 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:16:57,391 - WARNING - Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+2024-10-27 22:25:41,476 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:26:33,603 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:29:10,478 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:29:19,540 - WARNING - Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+2024-10-27 22:39:43,583 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:39:50,749 - WARNING - Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+2024-10-27 22:43:10,584 - WARNING - The model weights are not tied. Please use the `tie_weights` method before using the `infer_auto_device` function.
+2024-10-27 22:43:17,836 - WARNING - Detected kernel version 4.18.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
