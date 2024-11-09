@@ -139,3 +139,4 @@ def predict_button_location(model, processor, image_path):
 
 if __name__ == "__main__":
     main()
+    
