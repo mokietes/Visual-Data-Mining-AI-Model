@@ -11,8 +11,8 @@ check_job_status() {
 echo "Submitting Jupyter job to SLURM..."
 JOB_ID=$(ssh sfsu "sbatch ~/git-repos/Visual-Data-Mining-AI-Model/slurm_jupyter_job.sh" | awk '{print $4}') || exit 1
 echo "Submitted job ID: $JOB_ID"
-
 echo "Waiting for job to start..."
+
 # Wait for job to be running
 while true; do
     status=$(check_job_status $JOB_ID)
@@ -29,8 +29,8 @@ done
 
 # Give Jupyter a moment to write its files
 sleep 5
-
 echo "Getting connection details..."
+
 # Get node and port from log file, with better parsing
 while true; do
     LOG_LINE=$(ssh sfsu "grep -m1 'http://' jupyter_${JOB_ID}.log 2>/dev/null | grep -v 127.0.0.1")
@@ -51,12 +51,17 @@ TOKEN=$(ssh sfsu "grep -m1 'token=' jupyter_${JOB_ID}.log | sed -n 's/.*token=\(
 echo -e "\nJupyter is running!"
 echo "Node: $NODE"
 echo "Port: $PORT"
-echo -e "\nConnection URL:"
-echo "http://localhost:$PORT/?token=$TOKEN"
+
+# Display both local and remote URLs
+echo -e "\nConnection URLs:"
+echo "Local  URL: http://localhost:$PORT/?token=$TOKEN"
+echo "Remote URL: http://$NODE:$PORT/?token=$TOKEN"
+
 echo -e "\nJob Management:"
 echo "Check status: ssh sfsu \"squeue -j $JOB_ID\""
 echo "View logs:    ssh sfsu \"cat jupyter_${JOB_ID}.log\""
 echo "Kill job:     ssh sfsu \"scancel $JOB_ID\""
+
 echo -e "\nEstablishing SSH tunnel (keep this terminal open)..."
 
 # Try to establish SSH tunnel with retry
@@ -73,4 +78,3 @@ while [ $retry_count -lt $max_retries ]; do
     sleep 3
     retry_count=$((retry_count + 1))
 done
-
