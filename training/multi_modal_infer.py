@@ -131,6 +131,8 @@ def main(
         print("-" * 50)
         print(result.strip())
         print("-" * 50)
+
+        return result
         
     except Exception as e:
         print(f"An error occurred: {str(e)}")
