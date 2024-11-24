@@ -1,6 +1,5 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-print ("FINETUNING LOCAL")
 from collections import Counter
 import os
 
@@ -74,9 +73,6 @@ def setup_wandb(train_config, fsdp_config, **kwargs):
     return run
 
 def main(**kwargs):
-    from pprint import pprint
-
-    pprint(kwargs, width=1)
     
     # Update the configuration for the training and sharding process
     train_config, fsdp_config = TRAIN_CONFIG(), FSDP_CONFIG()
@@ -169,9 +165,10 @@ def main(**kwargs):
         
     if train_config.use_peft:
         # Load the pre-trained peft model checkpoint and setup its configuration
+        print(f"HDHJSDKFHSDKJHFSDKFKSDHF   train_config.from_peft_checkpoint: {train_config.from_peft_checkpoint} end")
         if train_config.from_peft_checkpoint:
             model = PeftModel.from_pretrained(model, train_config.from_peft_checkpoint, is_trainable=True)
-            peft_config = model.peft_config()
+            peft_config = model.peft_config
         # Generate the peft config and start fine-tuning from original model
         else:
             peft_config = generate_peft_config(train_config, kwargs)
