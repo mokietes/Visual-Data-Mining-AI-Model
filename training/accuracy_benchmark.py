@@ -154,6 +154,8 @@ val_test_dataset = temp_dataset['test'].train_test_split(test_size=0.5, shuffle=
 val_data = val_test_dataset['train']    # 10%
 test_data = val_test_dataset['test']    # 10%
 
+print("ANALYZING IMAGE ACCURACY")
+
 # Main execution
 manager = ModelMemoryManager()
 with manager.load_model(

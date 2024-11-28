@@ -58,17 +58,34 @@ from warnings import warn
 def setup_wandb(train_config, fsdp_config, **kwargs):
     try:
         import wandb
+        import os
     except ImportError:
-        raise ImportError(
-            "You are trying to use wandb which is not currently installed. "
-            "Please install it using pip install wandb"
-        )
+        raise ImportError("Please install wandb using: pip install wandb")
+        
     from llama_recipes.configs import wandb_config as WANDB_CONFIG
     wandb_config = WANDB_CONFIG()
     update_config(wandb_config, **kwargs)
     init_dict = dataclasses.asdict(wandb_config)
-    run = wandb.init(**init_dict)
-    run.config.update(train_config)
+    
+    # Check for existing run ID in either PEFT or full model checkpoint
+    checkpoint_dir = (train_config.from_peft_checkpoint 
+                     if hasattr(train_config, 'from_peft_checkpoint') 
+                     else train_config.output_dir)
+    
+    id_file = os.path.join(checkpoint_dir, "wandb_id.txt")
+    if os.path.exists(id_file):
+        with open(id_file, 'r') as f:
+            init_dict.update({'id': f.read().strip(), 'resume': 'auto'})
+    
+    return wandb.init(**init_dict)
+    
+    # NEW: Save run ID for next job to use
+    if not train_config.from_peft_checkpoint:
+        os.makedirs(train_config.output_dir, exist_ok=True)
+        with open(os.path.join(train_config.output_dir, "wandb_id.txt"), 'w') as f:
+            f.write(run.id)
+
+    run.config.update(train_config, allow_val_change=True)
     run.config.update(fsdp_config, allow_val_change=True)
     return run
 
@@ -174,7 +191,7 @@ def main(**kwargs):
             peft_config = generate_peft_config(train_config, kwargs)
             model = get_peft_model(model, peft_config)
         if wandb_run:
-            wandb_run.config.update(peft_config)
+            wandb_run.config.update(peft_config, allow_val_change=True)
         model.print_trainable_parameters()
 
     hsdp_device_mesh_plan = None
