@@ -6,9 +6,9 @@
 #SBATCH --job-name=llama_training
 #SBATCH --output=logs/training_job_%j.log
 
-N=3  # This will run the training 3 times sequentially
+N=8  # This will run the training 3 times sequentially (number of jobs)
 JOB_NUM=${1:-1}
-EPOCHS_PER_JOB=3  # Number of epochs per job
+EPOCHS_PER_JOB=1  # Number of epochs per job
 CHECKPOINT_ROOT="./finetuned_model"
 CHECKPOINT_DIR="fine-tuned"
 FULL_CHECKPOINT_PATH="${CHECKPOINT_ROOT}/${CHECKPOINT_DIR}"
@@ -65,31 +65,30 @@ run_training() {
    ls -R $CHECKPOINT_ROOT
    echo "Using training run ID: $TRAINING_RUN_ID"
 
-   # Run the training
-   torchrun --nnodes 1 --nproc_per_node 4 finetuning.py \
-       --enable_fsdp \
-       --lr 1e-5 \
-       --num_epochs $EPOCHS_PER_JOB \
-       --batch_size_training 8 \
-       --model_name meta-llama/Llama-3.2-11B-Vision-Instruct \
-       --dist_checkpoint_root_folder $CHECKPOINT_ROOT \
-       --dist_checkpoint_folder $CHECKPOINT_DIR \
-       --use_fast_kernels \
-       --dataset "custom_dataset" \
-       --custom_dataset.test_split "test" \
-       --custom_dataset.file "web_scraper_dataset.py" \
-       --run_validation True \
-       --batching_strategy padding \
-       --use_peft \
-       --peft_method lora \
-       --output_dir "$PEFT_WEIGHTS_DIR" \
-       --use_wandb True \
-       --wandb_config.project "llama_recipes" \
-       --wandb_config.group "$TRAINING_RUN_ID" \
-       $peft_flag
+CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes 1 --nproc_per_node 2 finetuning.py \
+    --enable_fsdp \
+    --lr 1e-5 \
+    --num_epochs $EPOCHS_PER_JOB \
+    --batch_size_training 8 \
+    --model_name meta-llama/Llama-3.2-11B-Vision-Instruct \
+    --dist_checkpoint_root_folder $CHECKPOINT_ROOT \
+    --dist_checkpoint_folder $CHECKPOINT_DIR \
+    --use_fast_kernels \
+    --dataset "custom_dataset" \
+    --custom_dataset.test_split "test" \
+    --custom_dataset.file "web_scraper_dataset.py" \
+    --run_validation True \
+    --batching_strategy padding \
+    --use_peft \
+    --peft_method lora \
+    --output_dir "$PEFT_WEIGHTS_DIR" \
+    --use_wandb True \
+    --wandb_config.project "llama_recipes" \
+    --wandb_config.group "$TRAINING_RUN_ID" \
+    $peft_flag
 
    #test how good we did!
-   #python3 accuracy_benchmark.py
+   python3 accuracy_benchmark.py
 }
 
 # Create checkpoint root directory if it doesn't exist
