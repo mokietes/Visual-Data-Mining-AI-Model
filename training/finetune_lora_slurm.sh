@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --partition=gpucluster
 #SBATCH --qos=interactive
-#SBATCH --time=24:00:00  # Increased time for full training
+#SBATCH --time=04:00:00
 #SBATCH --nodes=1
 #SBATCH --job-name=llama_training
 #SBATCH --output=logs/training_job_%j.log
 
-N=1  # Number of sequential training runs
+N=3  # Number of sequential training runs
 JOB_NUM=${1:-1}
-EPOCHS_PER_JOB=10  # Increased epochs for full training
+EPOCHS_PER_JOB=1  # Increased epochs for full training
 CHECKPOINT_ROOT="./trained_model"  # Changed from finetuned_model
 CHECKPOINT_DIR="full_training"     # Changed from fine-tuned
 FULL_CHECKPOINT_PATH="${CHECKPOINT_ROOT}/${CHECKPOINT_DIR}"
@@ -71,11 +71,11 @@ run_training() {
    echo "Using random port: $RANDOM_PORT"
 
    # Run the training with full training configuration
-   torchrun --nnodes 1 --nproc_per_node 4 --master_port $RANDOM_PORT training.py \
+   torchrun --nnodes 1 --nproc_per_node 4 --master_port $RANDOM_PORT finetuning.py \
        --enable_fsdp \
        --lr 3e-4 \
        --num_epochs $EPOCHS_PER_JOB \
-       --batch_size_training 16 \
+       --batch_size_training 1 \
        --model_name meta-llama/Llama-3.2-11B-Vision-Instruct \
        --dist_checkpoint_root_folder $CHECKPOINT_ROOT \
        --dist_checkpoint_folder $CHECKPOINT_DIR \
