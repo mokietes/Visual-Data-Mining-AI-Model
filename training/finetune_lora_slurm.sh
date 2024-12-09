@@ -6,7 +6,7 @@
 #SBATCH --job-name=llama_training
 #SBATCH --output=logs/training_job_%j.log
 
-N=8  # This will run the training 3 times sequentially (number of jobs)
+N=10  # This will run the training N times sequentially (number of jobs)
 JOB_NUM=${1:-1}
 EPOCHS_PER_JOB=1  # Number of epochs per job
 CHECKPOINT_ROOT="./finetuned_model"
@@ -60,12 +60,12 @@ run_training() {
    fi
 
    # Print debug information
-   echo "Current directory: $(pwd)"
-   echo "Checkpoint directory structure:"
-   ls -R $CHECKPOINT_ROOT
-   echo "Using training run ID: $TRAINING_RUN_ID"
+   #echo "Current directory: $(pwd)"
+   #echo "Checkpoint directory structure:"
+   #ls -R $CHECKPOINT_ROOT
+   #echo "Using training run ID: $TRAINING_RUN_ID"
 
-CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes 1 --nproc_per_node 2 finetuning.py \
+CUDA_VISIBLE_DEVICES=3 torchrun --nnodes 1 --nproc_per_node 1 finetuning.py \
     --enable_fsdp \
     --lr 1e-5 \
     --num_epochs $EPOCHS_PER_JOB \
@@ -76,7 +76,7 @@ CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes 1 --nproc_per_node 2 finetuning.py \
     --use_fast_kernels \
     --dataset "custom_dataset" \
     --custom_dataset.test_split "test" \
-    --custom_dataset.file "web_scraper_dataset.py" \
+    --custom_dataset.file "tokenize_dataset.py" \
     --run_validation True \
     --batching_strategy padding \
     --use_peft \
@@ -88,7 +88,7 @@ CUDA_VISIBLE_DEVICES=2,3 torchrun --nnodes 1 --nproc_per_node 2 finetuning.py \
     $peft_flag
 
    #test how good we did!
-   python3 accuracy_benchmark.py
+   python3 accuracy_benchmark_synthetic.py
 }
 
 # Create checkpoint root directory if it doesn't exist
@@ -128,6 +128,6 @@ if [ $? -eq 0 ]; then
 else
    echo "Training job $JOB_NUM failed at $(date)"
    echo "Final checkpoint directory contents:"
-   ls -R $CHECKPOINT_ROOT
+   #ls -R $CHECKPOINT_ROOT
    exit 1
 fi

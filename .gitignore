@@ -8,3 +8,5 @@ training/__pycache__/
 training/logs/
 training/wandb/
 finetuned_model/
+data_processing/synthetic_dataset/
+trained_model/
